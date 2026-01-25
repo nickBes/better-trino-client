@@ -1,0 +1,3 @@
+{
+  "extends": "@better-trino/config/tsconfig.base.json",
+}

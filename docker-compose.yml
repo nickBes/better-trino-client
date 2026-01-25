@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  trino:
+    image: trinodb/trino:latest
+    container_name: trino
+    ports:
+      - "8080:8080"
+    environment:
+      # Enable dynamic catalog management
+      - CATALOG_MANAGEMENT=dynamic
+    volumes:
+      # Mount custom catalog configurations (optional)
+      # - ./etc/trino/catalog:/etc/trino/catalog
+      # Mount full custom configuration (optional)
+      # - ./etc/trino:/etc/trino
+      # Mount additional plugins (optional)
+      # - ./plugins:/usr/lib/trino/plugin
+      # Persist dynamic catalogs across restarts
+      - trino-catalog-data:/etc/trino/catalog
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/v1/info || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  trino-catalog-data:
