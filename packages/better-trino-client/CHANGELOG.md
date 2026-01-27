@@ -1,5 +1,11 @@
 # @better-trino/client
 
+## 0.0.3
+
+### Patch Changes
+
+- Add missing types entry in package.json for TypeScript support
+
 ## 0.0.2
 
 ### Patch Changes

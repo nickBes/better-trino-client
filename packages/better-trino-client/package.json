@@ -1,6 +1,6 @@
 {
   "name": "@better-trino/client",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "description": "A modern, type-safe TypeScript client for Trino with comprehensive error handling and full protocol support",
   "keywords": [
@@ -25,6 +25,7 @@
     "test": "bun test",
     "test:watch": "bun test --watch"
   },
+  "types": "./dist/index.d.mts",
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
