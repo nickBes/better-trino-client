@@ -10,7 +10,7 @@
 /**
  * Standard column types in Trino
  * These correspond to the types that can appear in Column.type field
- * 
+ *
  * @see https://github.com/trinodb/trino/blob/master/client/trino-client/src/main/java/io/trino/client/ClientStandardTypes.java
  */
 export const ClientStandardTypes = {
@@ -57,38 +57,9 @@ export const ClientStandardTypes = {
 export type ClientStandardType = (typeof ClientStandardTypes)[keyof typeof ClientStandardTypes];
 
 /**
- * Check if a type string is a standard base type (not a parameterized complex type)
- * @param type - The type string from a Column
- * @returns true if the type is one of the standard base types
- * 
- * @example
- * isStandardType("bigint") // true
- * isStandardType("array(bigint)") // false
- * isStandardType("varchar") // true
- */
-export function isStandardType(type: string): type is ClientStandardType {
-  return Object.values(ClientStandardTypes).includes(type as ClientStandardType);
-}
-
-/**
- * Extract the base type from a complex type string
- * @param type - The type string from a Column
- * @returns the base type (e.g., "array" from "array(bigint)")
- * 
- * @example
- * getBaseType("array(bigint)") // "array"
- * getBaseType("map(varchar, integer)") // "map"
- * getBaseType("bigint") // "bigint"
- */
-export function getBaseType(type: string): string {
-  const match = type.match(/^([a-z0-9_]+)(\(|$)/i);
-  return match?.[1] ?? type;
-}
-
-/**
  * Trino client request headers
  * Used when making requests to the Trino REST API
- * 
+ *
  * @see https://github.com/trinodb/trino/blob/master/client/trino-client/src/main/java/io/trino/client/ClientSession.java
  */
 export interface ClientRequestHeaders {
@@ -137,7 +108,7 @@ export interface ClientRequestHeaders {
 /**
  * Trino server response headers
  * Returned by the Trino REST API and should be used to update subsequent request headers
- * 
+ *
  * @see https://github.com/trinodb/trino/blob/master/client/trino-client/src/main/java/io/trino/client/ClientSession.java
  */
 export interface ClientResponseHeaders {
@@ -173,7 +144,7 @@ export interface ClientResponseHeaders {
 
 /**
  * Location in the query where an error occurred
- * 
+ *
  * @see https://github.com/trinodb/trino/blob/master/client/trino-client/src/main/java/io/trino/client/ErrorLocation.java
  */
 export interface ErrorLocation {
@@ -183,7 +154,7 @@ export interface ErrorLocation {
 
 /**
  * Type signature parameter kind
- * 
+ *
  * @see https://github.com/trinodb/trino/blob/master/client/trino-client/src/main/java/io/trino/client/ClientTypeSignatureParameter.java
  */
 export enum ParameterKind {
@@ -194,7 +165,7 @@ export enum ParameterKind {
 
 /**
  * Client type signature parameter (discriminated union based on kind)
- * 
+ *
  * @see https://github.com/trinodb/trino/blob/master/client/trino-client/src/main/java/io/trino/client/ClientTypeSignatureParameter.java
  */
 export type ClientTypeSignatureParameter =
@@ -213,7 +184,7 @@ export type ClientTypeSignatureParameter =
 
 /**
  * Named type signature (used for ROW types)
- * 
+ *
  * @see https://github.com/trinodb/trino/blob/master/client/trino-client/src/main/java/io/trino/client/NamedClientTypeSignature.java
  */
 export interface NamedTypeSignature {
@@ -223,7 +194,7 @@ export interface NamedTypeSignature {
 
 /**
  * Type signature for complex types
- * 
+ *
  * @see https://github.com/trinodb/trino/blob/master/client/trino-client/src/main/java/io/trino/client/ClientTypeSignature.java
  */
 export interface ClientTypeSignature {
@@ -232,20 +203,20 @@ export interface ClientTypeSignature {
    * For complex types, this is the container type (e.g., "array", "map", "row").
    * Note: Some special types may use different casing (e.g., "Geometry", "SphericalGeography").
    */
-  rawType: string;
+  rawType: ClientStandardType;
   /** Type parameters for the type (e.g., element type for arrays, key/value types for maps) */
   arguments: ClientTypeSignatureParameter[];
 }
 
 /**
  * Column definition in query results
- * 
+ *
  * @see https://github.com/trinodb/trino/blob/master/client/trino-client/src/main/java/io/trino/client/Column.java
  */
 export interface Column {
   /** Column name */
   name: string;
-  /** 
+  /**
    * Type string representation.
    * For simple types, this will be one of ClientStandardTypes (e.g., "bigint", "varchar").
    * For complex types, this includes the full type specification (e.g., "array(bigint)", "map(varchar, integer)").
@@ -257,7 +228,7 @@ export interface Column {
 
 /**
  * Error information (used in FailureInfo)
- * 
+ *
  * @see https://github.com/trinodb/trino/blob/master/client/trino-client/src/main/java/io/trino/client/FailureInfo.java
  */
 export interface ErrorInfo {
@@ -267,7 +238,7 @@ export interface ErrorInfo {
 
 /**
  * Detailed failure information including stack trace
- * 
+ *
  * @see https://github.com/trinodb/trino/blob/master/client/trino-client/src/main/java/io/trino/client/FailureInfo.java
  */
 export interface FailureInfo {
@@ -282,7 +253,7 @@ export interface FailureInfo {
 
 /**
  * User error names - errors caused by invalid SQL or incorrect usage
- * 
+ *
  * @see https://github.com/trinodb/trino/blob/master/core/trino-spi/src/main/java/io/trino/spi/StandardErrorCode.java
  */
 export type UserErrorName =
@@ -428,7 +399,7 @@ export type UserErrorName =
 
 /**
  * Internal error names - server-side errors in Trino
- * 
+ *
  * @see https://github.com/trinodb/trino/blob/master/core/trino-spi/src/main/java/io/trino/spi/StandardErrorCode.java
  */
 export type InternalErrorName =
@@ -483,14 +454,14 @@ export type InsufficientResourcesErrorName =
 
 /**
  * External error names - errors from external systems
- * 
+ *
  * @see https://github.com/trinodb/trino/blob/master/core/trino-spi/src/main/java/io/trino/spi/StandardErrorCode.java
  */
 export type ExternalErrorName = "UNSUPPORTED_TABLE_TYPE" | string;
 
 /**
  * Base error information when a query fails
- * 
+ *
  * @see https://github.com/trinodb/trino/blob/master/client/trino-client/src/main/java/io/trino/client/QueryError.java
  */
 interface BaseQueryError {
@@ -503,7 +474,7 @@ interface BaseQueryError {
 
 /**
  * User error - typically caused by invalid SQL or incorrect usage
- * 
+ *
  * @see https://github.com/trinodb/trino/blob/master/client/trino-client/src/main/java/io/trino/client/QueryError.java
  */
 export interface UserError extends BaseQueryError {
@@ -513,7 +484,7 @@ export interface UserError extends BaseQueryError {
 
 /**
  * Internal error - server-side error in Trino
- * 
+ *
  * @see https://github.com/trinodb/trino/blob/master/client/trino-client/src/main/java/io/trino/client/QueryError.java
  */
 export interface InternalError extends BaseQueryError {
@@ -523,7 +494,7 @@ export interface InternalError extends BaseQueryError {
 
 /**
  * External error - error from external systems (connectors, etc.)
- * 
+ *
  * @see https://github.com/trinodb/trino/blob/master/client/trino-client/src/main/java/io/trino/client/QueryError.java
  */
 export interface ExternalError extends BaseQueryError {
@@ -533,7 +504,7 @@ export interface ExternalError extends BaseQueryError {
 
 /**
  * Insufficient resources error
- * 
+ *
  * @see https://github.com/trinodb/trino/blob/master/client/trino-client/src/main/java/io/trino/client/QueryError.java
  */
 export interface InsufficientResourcesError extends BaseQueryError {
@@ -543,14 +514,14 @@ export interface InsufficientResourcesError extends BaseQueryError {
 
 /**
  * Discriminated union of all query error types
- * 
+ *
  * @see https://github.com/trinodb/trino/blob/master/client/trino-client/src/main/java/io/trino/client/QueryError.java
  */
 export type QueryError = UserError | InternalError | ExternalError | InsufficientResourcesError;
 
 /**
  * Warning code details
- * 
+ *
  * @see https://github.com/trinodb/trino/blob/master/client/trino-client/src/main/java/io/trino/client/WarningCode.java
  */
 export interface WarningCode {
@@ -560,7 +531,7 @@ export interface WarningCode {
 
 /**
  * Warning information
- * 
+ *
  * @see https://github.com/trinodb/trino/blob/master/client/trino-client/src/main/java/io/trino/client/Warning.java
  */
 export interface Warning {
@@ -570,7 +541,7 @@ export interface Warning {
 
 /**
  * Statistics for a query execution stage
- * 
+ *
  * @see https://github.com/trinodb/trino/blob/master/client/trino-client/src/main/java/io/trino/client/StageStats.java
  */
 export interface StageStats {
@@ -594,7 +565,7 @@ export interface StageStats {
 
 /**
  * Statistics about query execution
- * 
+ *
  * @see https://github.com/trinodb/trino/blob/master/client/trino-client/src/main/java/io/trino/client/StatementStats.java
  */
 export interface StatementStats {
@@ -628,14 +599,14 @@ export interface StatementStats {
 
 /**
  * Query data wrapper (handles null data representation)
- * 
+ *
  * @see https://github.com/trinodb/trino/blob/master/client/trino-client/src/main/java/io/trino/client/QueryResults.java
  */
 export type QueryData = unknown[][] | null;
 
 /**
  * Main query results response from Trino
- * 
+ *
  * @see https://github.com/trinodb/trino/blob/master/client/trino-client/src/main/java/io/trino/client/QueryResults.java
  */
 export interface QueryResults {
