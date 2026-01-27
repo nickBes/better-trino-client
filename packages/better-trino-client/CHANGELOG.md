@@ -1,5 +1,11 @@
 # @better-trino/client
 
+## 0.0.4
+
+### Patch Changes
+
+- Add 'files' entry in package.json to specify distribution files
+
 ## 0.0.3
 
 ### Patch Changes
