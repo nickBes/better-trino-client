@@ -1,7 +1,6 @@
 {
   "name": "@better-trino/client",
   "version": "0.0.2",
-  "private": true,
   "type": "module",
   "description": "A modern, type-safe TypeScript client for Trino with comprehensive error handling and full protocol support",
   "keywords": [

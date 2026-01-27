@@ -223,8 +223,6 @@ The client exports all standard Trino column types as constants for type-safe co
 import { 
   ClientStandardTypes, 
   type ClientStandardType,
-  isStandardType,
-  getBaseType,
 } from "@better-trino/client";
 
 // Use the constants
@@ -243,16 +241,7 @@ for await (const result of client.executeQuery("SELECT * FROM table")) {
   }
 }
 
-// Check if a type is a standard base type
-isStandardType("bigint"); // true
-isStandardType("array(bigint)"); // false - this is a complex type
-
-// Extract base type from complex types
-getBaseType("array(bigint)"); // "array"
-getBaseType("map(varchar, integer)"); // "map"
-getBaseType("bigint"); // "bigint"
-
-// Working with complex types
+// Working with complex types using typeSignature
 for await (const result of client.executeQuery(`
   SELECT 
     ARRAY[1, 2, 3] as numbers,
@@ -260,20 +249,19 @@ for await (const result of client.executeQuery(`
 `)) {
   if (result.ok && result.value.columns) {
     for (const column of result.value.columns) {
-      const baseType = getBaseType(column.type);
-      
-      if (baseType === ClientStandardTypes.ARRAY) {
-        console.log(`${column.name} is an array: ${column.type}`);
-        // e.g., "numbers is an array: array(integer)"
-      } else if (baseType === ClientStandardTypes.MAP) {
-        console.log(`${column.name} is a map: ${column.type}`);
-        // e.g., "mapping is a map: map(varchar, integer)"
-      }
-      
-      // Access detailed type signature for complex types
+      // Access the base type directly from typeSignature
       if (column.typeSignature) {
-        console.log("Raw type:", column.typeSignature.rawType);
-        console.log("Arguments:", column.typeSignature.arguments);
+        const baseType = column.typeSignature.rawType;
+        
+        if (baseType === ClientStandardTypes.ARRAY) {
+          console.log(`${column.name} is an array: ${column.type}`);
+          console.log("Arguments:", column.typeSignature.arguments);
+          // e.g., "numbers is an array: array(integer)"
+        } else if (baseType === ClientStandardTypes.MAP) {
+          console.log(`${column.name} is a map: ${column.type}`);
+          console.log("Arguments:", column.typeSignature.arguments);
+          // e.g., "mapping is a map: map(varchar, integer)"
+        }
       }
     }
   }
@@ -297,7 +285,7 @@ function handleColumn(name: string, type: ClientStandardType) {
 - Sketch: `HYPER_LOG_LOG`, `P4_HYPER_LOG_LOG`, `QDIGEST`, `TDIGEST`, `SET_DIGEST`
 - Geospatial: `BING_TILE`, `KDB_TREE`
 
-**Note:** For complex types like `array(bigint)` or `map(varchar, integer)`, the `Column.type` field contains the full type specification as a string. Use `getBaseType()` to extract the base type, or check `Column.typeSignature` for detailed type information.
+**Note:** For complex types like `array(bigint)` or `map(varchar, integer)`, the `Column.type` field contains the full type specification as a string. To get the base type, use `Column.typeSignature.rawType` which is typed as `ClientStandardType`.
 
 ## Examples
 
