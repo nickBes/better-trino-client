@@ -47,11 +47,13 @@ export class Trino {
   private baseUrl: string;
   private defaultHeaders: ClientRequestHeaders;
   private auth?: AuthConfig;
+  private sessionHeaders: ClientRequestHeaders;
 
   constructor(config: TrinoClientConfig) {
     this.baseUrl = config.baseUrl.replace(/\/$/, ""); // Remove trailing slash
     this.auth = config.auth;
     this.defaultHeaders = config.headers || {};
+    this.sessionHeaders = {};
   }
 
   /**
@@ -62,9 +64,7 @@ export class Trino {
    * @yields QueryResult (Ok with QuerySuccessResult or Err with QueryErrorResult)
    */
   async *executeQuery(sql: string, options?: QueryOptions): AsyncGenerator<QueryResult, void> {
-    // Each query execution maintains its own session headers
-    let sessionHeaders: ClientRequestHeaders = {};
-    const headers = this.buildHeaders(sessionHeaders, options?.headers);
+    const headers = this.buildHeaders(this.sessionHeaders, options?.headers);
 
     // Initial POST request to /v1/statement
     let response: Response;
@@ -88,7 +88,7 @@ export class Trino {
       return;
     }
 
-    sessionHeaders = this.updateSessionHeaders(sessionHeaders, response.headers);
+    this.sessionHeaders = this.updateSessionHeaders(this.sessionHeaders, response.headers);
 
     let result: QueryResults;
     try {
@@ -116,7 +116,7 @@ export class Trino {
       try {
         response = await this.fetch(result.nextUri, {
           method: "GET",
-          headers: this.buildHeaders(sessionHeaders),
+          headers: this.buildHeaders(this.sessionHeaders),
         });
       } catch (error) {
         yield { ok: false, error: this.createFetchError(error) };
@@ -129,7 +129,7 @@ export class Trino {
         return;
       }
 
-      sessionHeaders = this.updateSessionHeaders(sessionHeaders, response.headers);
+      this.sessionHeaders = this.updateSessionHeaders(this.sessionHeaders, response.headers);
 
       try {
         result = (await response.json()) as QueryResults;
@@ -210,70 +210,71 @@ export class Trino {
     sessionHeaders: ClientRequestHeaders,
     responseHeaders: Headers,
   ): ClientRequestHeaders {
-    const updates: Partial<ClientResponseHeaders> = {};
+    const updates: ClientResponseHeaders = {};
 
+    // Headers API returns lowercase header names
     responseHeaders.forEach((value, key) => {
       updates[key as keyof ClientResponseHeaders] = value;
     });
 
-    const newHeaders = { ...sessionHeaders };
+    const newHeaders: ClientRequestHeaders = { ...sessionHeaders };
 
     // Process response headers to update session state
-    if (updates["X-Trino-Set-Catalog"]) {
-      newHeaders["X-Trino-Catalog"] = updates["X-Trino-Set-Catalog"];
+    if (updates["x-trino-set-catalog"]) {
+      newHeaders["x-trino-catalog"] = updates["x-trino-set-catalog"];
     }
-    if (updates["X-Trino-Set-Schema"]) {
-      newHeaders["X-Trino-Schema"] = updates["X-Trino-Set-Schema"];
+    if (updates["x-trino-set-schema"]) {
+      newHeaders["x-trino-schema"] = updates["x-trino-set-schema"];
     }
-    if (updates["X-Trino-Set-Path"]) {
-      newHeaders["X-Trino-Path"] = updates["X-Trino-Set-Path"];
+    if (updates["x-trino-set-path"]) {
+      newHeaders["x-trino-path"] = updates["x-trino-set-path"];
     }
-    if (updates["X-Trino-Set-Session"]) {
-      const currentSession = newHeaders["X-Trino-Session"] || "";
+    if (updates["x-trino-set-session"]) {
+      const currentSession = newHeaders["x-trino-session"] || "";
       const sessions = currentSession ? currentSession.split(",") : [];
-      sessions.push(updates["X-Trino-Set-Session"]);
-      newHeaders["X-Trino-Session"] = sessions.join(",");
+      sessions.push(updates["x-trino-set-session"]);
+      newHeaders["x-trino-session"] = sessions.join(",");
     }
-    if (updates["X-Trino-Clear-Session"]) {
-      const propertyToRemove = updates["X-Trino-Clear-Session"];
-      const currentSession = newHeaders["X-Trino-Session"] || "";
+    if (updates["x-trino-clear-session"]) {
+      const currentSession = newHeaders["x-trino-session"] || "";
       const sessions = currentSession
         .split(",")
-        .filter((s) => !s.startsWith(`${propertyToRemove}=`));
-      newHeaders["X-Trino-Session"] = sessions.join(",") || undefined;
+        .filter((s) => !s.startsWith(`${updates["x-trino-clear-session"]}=`));
+      newHeaders["x-trino-session"] = sessions.join(",") || undefined;
     }
-    if (updates["X-Trino-Set-Role"]) {
-      newHeaders["X-Trino-Role"] = updates["X-Trino-Set-Role"];
+    if (updates["x-trino-set-role"]) {
+      newHeaders["x-trino-role"] = updates["x-trino-set-role"];
     }
-    if (updates["X-Trino-Added-Prepare"]) {
-      const currentPrepared = newHeaders["X-Trino-Prepared-Statement"] || "";
+    if (updates["x-trino-added-prepare"]) {
+      const currentPrepared = newHeaders["x-trino-prepared-statement"] || "";
       const prepared = currentPrepared ? currentPrepared.split(",") : [];
-      prepared.push(updates["X-Trino-Added-Prepare"]);
-      newHeaders["X-Trino-Prepared-Statement"] = prepared.join(",");
+      prepared.push(updates["x-trino-added-prepare"]);
+      newHeaders["x-trino-prepared-statement"] = prepared.join(",");
     }
-    if (updates["X-Trino-Deallocated-Prepare"]) {
-      const nameToRemove = updates["X-Trino-Deallocated-Prepare"];
-      const currentPrepared = newHeaders["X-Trino-Prepared-Statement"] || "";
-      const prepared = currentPrepared.split(",").filter((s) => !s.startsWith(`${nameToRemove}=`));
-      newHeaders["X-Trino-Prepared-Statement"] = prepared.join(",") || undefined;
+    if (updates["x-trino-deallocated-prepare"]) {
+      const currentPrepared = newHeaders["x-trino-prepared-statement"] || "";
+      const prepared = currentPrepared
+        .split(",")
+        .filter((s) => !s.startsWith(`${updates["x-trino-deallocated-prepare"]}=`));
+      newHeaders["x-trino-prepared-statement"] = prepared.join(",") || undefined;
     }
-    if (updates["X-Trino-Started-Transaction-Id"]) {
-      newHeaders["X-Trino-Transaction-Id"] = updates["X-Trino-Started-Transaction-Id"];
+    if (updates["x-trino-started-transaction-id"]) {
+      newHeaders["x-trino-transaction-id"] = updates["x-trino-started-transaction-id"];
     }
-    if (updates["X-Trino-Clear-Transaction-Id"]) {
-      delete newHeaders["X-Trino-Transaction-Id"];
+    if (updates["x-trino-clear-transaction-id"]) {
+      delete newHeaders["x-trino-transaction-id"];
     }
-    if (updates["X-Trino-Set-Authorization-User"]) {
-      newHeaders["X-Trino-User"] = updates["X-Trino-Set-Authorization-User"];
+    if (updates["x-trino-set-authorization-user"]) {
+      newHeaders["x-trino-user"] = updates["x-trino-set-authorization-user"];
       // Keep original user if setting authorization
-      if (!newHeaders["X-Trino-Original-User"] && this.defaultHeaders["X-Trino-User"]) {
-        newHeaders["X-Trino-Original-User"] = this.defaultHeaders["X-Trino-User"];
+      if (!newHeaders["x-trino-original-user"] && this.defaultHeaders["x-trino-user"]) {
+        newHeaders["x-trino-original-user"] = this.defaultHeaders["x-trino-user"];
       }
     }
-    if (updates["X-Trino-Reset-Authorization-User"]) {
-      if (newHeaders["X-Trino-Original-User"]) {
-        newHeaders["X-Trino-User"] = newHeaders["X-Trino-Original-User"];
-        delete newHeaders["X-Trino-Original-User"];
+    if (updates["x-trino-reset-authorization-user"]) {
+      if (newHeaders["x-trino-original-user"]) {
+        newHeaders["x-trino-user"] = newHeaders["x-trino-original-user"];
+        delete newHeaders["x-trino-original-user"];
       }
     }
 

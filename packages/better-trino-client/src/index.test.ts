@@ -34,9 +34,9 @@ describe("Trino Client", () => {
     client = new Trino({
       baseUrl: TRINO_BASE_URL,
       headers: {
-        "X-Trino-User": "test-user",
-        "X-Trino-Catalog": "tpch",
-        "X-Trino-Schema": "tiny",
+        "x-trino-user": "test-user",
+        "x-trino-catalog": "tpch",
+        "x-trino-schema": "tiny",
       },
     });
   });
@@ -172,7 +172,9 @@ describe("Trino Client", () => {
 
       expect(columns).toBeDefined();
       expect(columns?.find((c) => c.name === "bigint_col")?.typeSignature?.rawType).toBe("bigint");
-      expect(columns?.find((c) => c.name === "varchar_col")?.typeSignature?.rawType).toBe("varchar");
+      expect(columns?.find((c) => c.name === "varchar_col")?.typeSignature?.rawType).toBe(
+        "varchar",
+      );
       expect(columns?.find((c) => c.name === "array_col")?.typeSignature?.rawType).toBe("array");
       expect(columns?.find((c) => c.name === "map_col")?.typeSignature?.rawType).toBe("map");
     });
@@ -217,7 +219,7 @@ describe("Trino Client", () => {
       const badClient = new Trino({
         baseUrl: "http://invalid-host-that-does-not-exist:9999",
         headers: {
-          "X-Trino-User": "test-user",
+          "x-trino-user": "test-user",
         },
       });
 
@@ -272,12 +274,12 @@ describe("Trino Client", () => {
     test("should cancel query after fetching multiple chunks", async () => {
       const query = "SELECT * FROM lineitem ORDER BY orderkey, linenumber";
       const generator = client.executeQuery(query);
-      
+
       const firstResult = await generator.next();
       if (firstResult.done || !firstResult.value.ok) {
         throw new Error("Expected first result");
       }
-      
+
       const cancelUri = firstResult.value.value.nextUri;
       expect(cancelUri).toBeDefined();
 
@@ -285,7 +287,7 @@ describe("Trino Client", () => {
       if (secondResult.done) {
         throw new Error("Expected second result");
       }
-      
+
       // Cancel using the first cancel URI
       const cancelResult = await client.cancelQuery(cancelUri!);
       expect(cancelResult.ok).toBe(true);
@@ -296,7 +298,7 @@ describe("Trino Client", () => {
       while (resultsAfterCancel < 10) {
         const next = await generator.next();
         if (next.done) break;
-        
+
         resultsAfterCancel++;
         if (!next.value.ok) {
           expect(next.value.error._tag).toBe("UserError");
@@ -307,7 +309,7 @@ describe("Trino Client", () => {
           break;
         }
       }
-      
+
       expect(gotCancelError).toBe(true);
     });
 
@@ -318,6 +320,36 @@ describe("Trino Client", () => {
       expect(cancelResult.ok).toBe(false);
       if (!cancelResult.ok) {
         expect(cancelResult.error._tag).toBe("HttpError");
+      }
+    });
+  });
+
+  describe("Prepared Statements", () => {
+    test("should allocate, describe, and deallocate a prepared statement", async () => {
+      // Allocate a prepared statement
+      for await (const result of client.executeQuery(
+        "PREPARE my_statement FROM SELECT * FROM nation WHERE nationkey = ?",
+      )) {
+        unwrap(result); // Just verify it didn't error
+      }
+
+      // Describe the prepared statement
+      let columns: QuerySuccessResult["columns"];
+      for await (const result of client.executeQuery("DESCRIBE OUTPUT my_statement")) {
+        const queryResult = unwrap(result);
+        if (queryResult.columns) {
+          columns = queryResult.columns;
+        }
+      }
+
+      expect(columns).toBeDefined();
+      expect(columns?.length).toBeGreaterThan(0);
+      expect(columns?.find((c) => c.name === "Column Name")).toBeDefined();
+      expect(columns?.find((c) => c.name === "Type")).toBeDefined();
+
+      // Deallocate the prepared statement
+      for await (const result of client.executeQuery("DEALLOCATE PREPARE my_statement")) {
+        unwrap(result); // Just verify it didn't error
       }
     });
   });

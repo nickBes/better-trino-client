@@ -59,87 +59,89 @@ export type ClientStandardType = (typeof ClientStandardTypes)[keyof typeof Clien
 /**
  * Trino client request headers
  * Used when making requests to the Trino REST API
+ * Note: Header names are lowercase to match HTTP conventions
  *
  * @see https://github.com/trinodb/trino/blob/master/client/trino-client/src/main/java/io/trino/client/ClientSession.java
  */
 export interface ClientRequestHeaders {
   /** Specifies the session user */
-  "X-Trino-User"?: string;
+  "x-trino-user"?: string;
   /** Specifies the session's original user */
-  "X-Trino-Original-User"?: string;
+  "x-trino-original-user"?: string;
   /** Specifies the roles of the original user */
-  "X-Trino-Original-Roles"?: string;
+  "x-trino-original-roles"?: string;
   /** For reporting purposes, supplies the name of the software that submitted the query */
-  "X-Trino-Source"?: string;
+  "x-trino-source"?: string;
   /** The catalog context for query processing */
-  "X-Trino-Catalog"?: string;
+  "x-trino-catalog"?: string;
   /** The schema context for query processing */
-  "X-Trino-Schema"?: string;
+  "x-trino-schema"?: string;
   /** The path context for query processing */
-  "X-Trino-Path"?: string;
+  "x-trino-path"?: string;
   /** The timezone for query processing */
-  "X-Trino-Time-Zone"?: string;
+  "x-trino-time-zone"?: string;
   /** The language for query processing and formatting results (e.g., "en-US") */
-  "X-Trino-Language"?: string;
+  "x-trino-language"?: string;
   /** Trace token to help identify log lines */
-  "X-Trino-Trace-Token"?: string;
+  "x-trino-trace-token"?: string;
   /** Comma-separated list of name=value pairs as session properties */
-  "X-Trino-Session"?: string;
+  "x-trino-session"?: string;
   /** Sets the role for query processing */
-  "X-Trino-Role"?: string;
+  "x-trino-role"?: string;
   /** Comma-separated list of prepared statement name=key pairs */
-  "X-Trino-Prepared-Statement"?: string;
+  "x-trino-prepared-statement"?: string;
   /** The transaction ID to use for query processing */
-  "X-Trino-Transaction-Id"?: string;
+  "x-trino-transaction-id"?: string;
   /** Arbitrary information about the client program */
-  "X-Trino-Client-Info"?: string;
+  "x-trino-client-info"?: string;
   /** Comma-separated list of tag strings for resource groups */
-  "X-Trino-Client-Tags"?: string;
+  "x-trino-client-tags"?: string;
   /** Client capabilities */
-  "X-Trino-Client-Capabilities"?: string;
+  "x-trino-client-capabilities"?: string;
   /** Comma-separated list of resource=value assignments (EXECUTION_TIME, CPU_TIME, PEAK_MEMORY, PEAK_TASK_MEMORY) */
-  "X-Trino-Resource-Estimate"?: string;
+  "x-trino-resource-estimate"?: string;
   /** Extra credentials for the connector (name=value) */
-  "X-Trino-Extra-Credential"?: string;
+  "x-trino-extra-credential"?: string;
   /** Query data encoding format */
-  "X-Trino-Query-Data-Encoding"?: string;
+  "x-trino-query-data-encoding"?: string;
 }
 
 /**
  * Trino server response headers
  * Returned by the Trino REST API and should be used to update subsequent request headers
+ * Note: Header names are lowercase to match the fetch Headers API which normalizes names
  *
  * @see https://github.com/trinodb/trino/blob/master/client/trino-client/src/main/java/io/trino/client/ClientSession.java
  */
 export interface ClientResponseHeaders {
   /** Instructs client to set the catalog in subsequent requests */
-  "X-Trino-Set-Catalog"?: string;
+  "x-trino-set-catalog"?: string;
   /** Instructs client to set the schema in subsequent requests */
-  "X-Trino-Set-Schema"?: string;
+  "x-trino-set-schema"?: string;
   /** Instructs client to set the path in subsequent requests */
-  "X-Trino-Set-Path"?: string;
+  "x-trino-set-path"?: string;
   /** Instructs client to add a session property (format: property=value) */
-  "X-Trino-Set-Session"?: string;
+  "x-trino-set-session"?: string;
   /** Instructs client to remove a session property */
-  "X-Trino-Clear-Session"?: string;
+  "x-trino-clear-session"?: string;
   /** Instructs client to set the role in subsequent requests */
-  "X-Trino-Set-Role"?: string;
+  "x-trino-set-role"?: string;
   /** Instructs client to set the roles of the original user */
-  "X-Trino-Set-Original-Roles"?: string;
+  "x-trino-set-original-roles"?: string;
   /** Query data encoding format used in response */
-  "X-Trino-Query-Data-Encoding"?: string;
+  "x-trino-query-data-encoding"?: string;
   /** Instructs client to add a prepared statement (format: name=key) */
-  "X-Trino-Added-Prepare"?: string;
+  "x-trino-added-prepare"?: string;
   /** Instructs client to remove a prepared statement */
-  "X-Trino-Deallocated-Prepare"?: string;
+  "x-trino-deallocated-prepare"?: string;
   /** Provides the transaction ID to use in subsequent requests */
-  "X-Trino-Started-Transaction-Id"?: string;
+  "x-trino-started-transaction-id"?: string;
   /** Instructs client to clear the transaction ID */
-  "X-Trino-Clear-Transaction-Id"?: string;
+  "x-trino-clear-transaction-id"?: string;
   /** Instructs client to set the authorization user */
-  "X-Trino-Set-Authorization-User"?: string;
+  "x-trino-set-authorization-user"?: string;
   /** Instructs client to reset the authorization user to the original user */
-  "X-Trino-Reset-Authorization-User"?: string;
+  "x-trino-reset-authorization-user"?: string;
 }
 
 /**

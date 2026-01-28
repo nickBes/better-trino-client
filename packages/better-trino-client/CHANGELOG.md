@@ -1,5 +1,11 @@
 # @better-trino/client
 
+## 0.0.5
+
+### Patch Changes
+
+- Normalize Trino request and response header names to lowercase and persist session headers cross queries
+
 ## 0.0.4
 
 ### Patch Changes
