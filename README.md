@@ -23,9 +23,9 @@ import { Trino } from "@better-trino/client";
 const client = new Trino({
   baseUrl: "http://localhost:8080",
   headers: {
-    "X-Trino-User": "user",
-    "X-Trino-Catalog": "tpch",
-    "X-Trino-Schema": "tiny",
+    "x-trino-user": "user",
+    "x-trino-catalog": "tpch",
+    "x-trino-schema": "tiny",
   },
 });
 

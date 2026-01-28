@@ -28,9 +28,9 @@ import { Trino } from "@better-trino/client";
 const client = new Trino({
   baseUrl: "http://localhost:8080",
   headers: {
-    "X-Trino-User": "your-user",
-    "X-Trino-Catalog": "tpch",
-    "X-Trino-Schema": "tiny",
+    "x-trino-user": "your-user",
+    "x-trino-catalog": "tpch",
+    "x-trino-schema": "tiny",
   },
 });
 
@@ -57,9 +57,9 @@ const clientBasic = new Trino({
     password: "secret",
   },
   headers: {
-    "X-Trino-User": "admin",
-    "X-Trino-Catalog": "tpch",
-    "X-Trino-Schema": "tiny",
+    "x-trino-user": "admin",
+    "x-trino-catalog": "tpch",
+    "x-trino-schema": "tiny",
   },
 });
 
@@ -71,7 +71,7 @@ const clientBearer = new Trino({
     token: "your-jwt-token",
   },
   headers: {
-    "X-Trino-User": "your-user",
+    "x-trino-user": "your-user",
   },
 });
 ```
@@ -96,7 +96,7 @@ Creates a new Trino client instance.
 const client = new Trino({
   baseUrl: "http://localhost:8080",
   headers: {
-    "X-Trino-User": "myuser",
+    "x-trino-user": "myuser",
   },
 });
 
@@ -109,7 +109,7 @@ const clientAuth = new Trino({
     password: "secret",
   },
   headers: {
-    "X-Trino-User": "admin",
+    "x-trino-user": "admin",
   },
 });
 ```

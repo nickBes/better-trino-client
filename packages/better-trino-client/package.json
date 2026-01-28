@@ -2,6 +2,7 @@
   "name": "@better-trino/client",
   "version": "0.0.5",
   "type": "module",
+  "license": "MIT",
   "description": "A modern, type-safe TypeScript client for Trino with comprehensive error handling and full protocol support",
   "keywords": [
     "trino",
