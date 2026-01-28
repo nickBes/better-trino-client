@@ -1,5 +1,10 @@
 # @better-trino/client
 
+[![npm version](https://img.shields.io/npm/v/@better-trino/client.svg)](https://www.npmjs.com/package/@better-trino/client)
+[![npm downloads](https://img.shields.io/npm/dm/@better-trino/client.svg)](https://www.npmjs.com/package/@better-trino/client)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](../../LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
+
 A modern, type-safe TypeScript client for Trino (formerly PrestoSQL) with comprehensive error handling and full protocol support.
 
 ## Features
